@@ -49,12 +49,23 @@ NF_MM = '#,##0.00;-#,##0.00;"-"'
 NF_PCT = '0%;-0%;"-"'
 NF_PCT2 = '0.0%'
 
-wb = Workbook()
-ws_set = wb.active
-ws_set.title = "Settings"
-ws = wb.create_sheet("Volume Calculation")
-ws_sum = wb.create_sheet("Summary")
-ws_lk = wb.create_sheet("Lookup")
+# When run via runpy with init_globals={"TARGET_WB": wb, "SHEET_NAMES": {...}} the sheets are added to
+# an existing workbook (used by build_pricing.py); otherwise a standalone template is created.
+SHEET_NAMES = globals().get("SHEET_NAMES") or {"set": "Settings", "vc": "Volume Calculation", "sum": "Summary", "lk": "Lookup"}
+STANDALONE = globals().get("TARGET_WB") is None
+q = lambda n: f"'{n}'" if " " in n else n
+SS, SVC, SSUM, SL = (q(SHEET_NAMES[k]) for k in ("set", "vc", "sum", "lk"))
+if STANDALONE:
+    wb = Workbook()
+    ws_set = wb.active
+    ws_set.title = SHEET_NAMES["set"]
+else:
+    wb = TARGET_WB
+    ws_set = wb.create_sheet(SHEET_NAMES["set"])
+ws = wb.create_sheet(SHEET_NAMES["vc"])
+ws_sum = wb.create_sheet(SHEET_NAMES["sum"])
+ws_lk = wb.create_sheet(SHEET_NAMES["lk"])
+ITEMS = []  # (kind, item no, tag row, considered-volume row)
 
 
 def name(n, ref):
@@ -126,7 +137,7 @@ def lk_table(col, title, rows, hdrs, nm_prefix, numcols):
     for j, n in enumerate(nm_prefix):
         if n:
             L = get_column_letter(c0 + j)
-            name(n, f"Lookup!${L}${first}:${L}${last}")
+            name(n, f"{SL}!${L}${first}:${L}${last}")
     return last
 
 
@@ -158,10 +169,10 @@ for i, (nps, od, wt) in enumerate(PIPES):
         style(lk.cell(row=r, column=3 + j, value=wt.get(s)), f_body)
 p_first, p_last = pr + 2, pr + 1 + len(PIPES)
 lastcol = get_column_letter(2 + len(SCHEDS))
-name("NPSU", f"Lookup!$A${p_first}:$A${p_last}")
-name("PipeOD", f"Lookup!$B${p_first}:$B${p_last}")
-name("SchU", f"Lookup!$C${pr+1}:${lastcol}${pr+1}")
-name("PipeWT", f"Lookup!$C${p_first}:${lastcol}${p_last}")
+name("NPSU", f"{SL}!$A${p_first}:$A${p_last}")
+name("PipeOD", f"{SL}!$B${p_first}:$B${p_last}")
+name("SchU", f"{SL}!$C${pr+1}:${lastcol}${pr+1}")
+name("PipeWT", f"{SL}!$C${p_first}:${lastcol}${p_last}")
 lk.column_dimensions["A"].width = 16
 
 # ================================================================ SETTINGS sheet
@@ -170,7 +181,7 @@ s.sheet_view.showGridLines = False
 for c, w in {"A": 2, "B": 34, "C": 26, "D": 44, "E": 14, "F": 16, "G": 56}.items():
     s.column_dimensions[c].width = w
 s["B1"] = "Chemical Cleaning / Decontamination – Volume Estimate Template"; s["B1"].font = f_title
-s["B2"] = ("Fill in the yellow cells on this sheet first, then the 'Volume Calculation' sheet. "
+s["B2"] = (f"Fill in the yellow cells on this sheet first, then the '{SHEET_NAMES['vc']}' sheet. "
            "The 'Summary' sheet is the proposal output."); s["B2"].font = f_sub
 
 r = 4
@@ -181,7 +192,7 @@ for i, t in enumerate(info):
     style(s[f"B{rr}"], f_bold, al=AL_LN); s[f"B{rr}"].value = t
     style(s[f"C{rr}"], f_in, FILL_IN, al=AL_LN)
     s.merge_cells(f"C{rr}:D{rr}")
-name("ProjClient", f"Settings!$C${r+1}"); name("ProjPlant", f"Settings!$C${r+2}"); name("ProjNo", f"Settings!$C${r+3}")
+name("ProjClient", f"{SS}!$C${r+1}"); name("ProjPlant", f"{SS}!$C${r+2}"); name("ProjNo", f"{SS}!$C${r+3}")
 s[f"C{r+6}"].number_format = "dd-mmm-yyyy"
 
 r = 13
@@ -190,14 +201,14 @@ for i in range(N_TRAINS):
     rr = r + 1 + i
     style(s[f"B{rr}"], f_bold, al=AL_LN); s[f"B{rr}"].value = f"Train {i+1} name"
     style(s[f"C{rr}"], f_in, FILL_IN, al=AL_LN); s[f"C{rr}"].value = f"Train {i+1}"
-    name(f"TrainName{i+1}", f"Settings!$C${rr}")
+    name(f"TrainName{i+1}", f"{SS}!$C${rr}")
 
 r = 20
 s[f"B{r}"] = "JOB TYPE  (drives the whole calculation)"; s[f"B{r}"].font = f_blk
 style(s[f"B{r+1}"], f_bold, al=AL_LN); s[f"B{r+1}"].value = "Job type"
 style(s[f"C{r+1}"], Font(name=FN, size=12, bold=True, color="0000FF"), PatternFill("solid", fgColor="FFFF00"), al=AL_C)
 s[f"C{r+1}"].value = "Chemical Cleaning"
-name("JobType", f"Settings!$C${r+1}")
+name("JobType", f"{SS}!$C${r+1}")
 dv = DataValidation(type="list", formula1="=JobU", allow_blank=False); s.add_data_validation(dv); dv.add(f"C{r+1}")
 
 r = 23
@@ -212,7 +223,7 @@ for i, (t, v, u, n, note) in enumerate(gp):
     style(s[f"C{rr}"], f_in, FILL_IN, al=AL_C); s[f"C{rr}"].value = v
     style(s[f"D{rr}"], f_body, al=AL_LN); s[f"D{rr}"].value = u
     s[f"G{rr}"] = note; s[f"G{rr}"].font = f_grey
-    name(n, f"Settings!$C${rr}")
+    name(n, f"{SS}!$C${rr}")
 
 r = 29
 s[f"B{r}"] = "METHODOLOGY – % of equipment volume considered and chemical dosage (edit per project)"; s[f"B{r}"].font = f_blk
@@ -242,13 +253,13 @@ for i, row in enumerate(METH):
             style(c, f_in, FILL_IN, al=AL_C if j != 2 else AL_L, nf=NF_PCT2 if j in (1, 3, 4) else None)
     s.row_dimensions[rr].height = 28
 m1, m2 = r + 2, r + 1 + len(METH)
-name("DecTypeU", f"Settings!$B${m1}:$B${m2}")
-name("DecMeth", f"Settings!$D${m1}:$D${m2}")
-name("DecFill", f"Settings!$E${m1}:$E${m2}")
-name("DecChem", f"Settings!$F${m1}:$F${m2}")
-name("EqTypeU", f"Settings!$B${m1+2}:$B${m2}")          # Column … Tank (vessel-type equipment)
-name("CC_HX", f"Settings!$C${m1}")
-name("CC_PIPE", f"Settings!$C${m1+1}")
+name("DecTypeU", f"{SS}!$B${m1}:$B${m2}")
+name("DecMeth", f"{SS}!$D${m1}:$D${m2}")
+name("DecFill", f"{SS}!$E${m1}:$E${m2}")
+name("DecChem", f"{SS}!$F${m1}:$F${m2}")
+name("EqTypeU", f"{SS}!$B${m1+2}:$B${m2}")          # Column … Tank (vessel-type equipment)
+name("CC_HX", f"{SS}!$C${m1}")
+name("CC_PIPE", f"{SS}!$C${m1+1}")
 
 r = m2 + 2
 s[f"B{r}"] = "CHEMICAL CLEANING – method options for vessels / columns / tanks (chosen per item)"; s[f"B{r}"].font = f_blk
@@ -261,8 +272,8 @@ for i, (a, b, c_) in enumerate(CCM):
     style(s.cell(row=rr, column=2, value=a), f_bold, al=AL_LN)
     style(s.cell(row=rr, column=3, value=b), f_in, FILL_IN, nf=NF_PCT2, al=AL_C)
     style(s.cell(row=rr, column=4, value=c_), Font(name=FN, size=9, color="595959"), al=AL_L)
-name("CCMethU", f"Settings!$B${r+2}:$B${r+1+len(CCM)}")
-name("CCMethPct", f"Settings!$C${r+2}:$C${r+1+len(CCM)}")
+name("CCMethU", f"{SS}!$B${r+2}:$B${r+1+len(CCM)}")
+name("CCMethPct", f"{SS}!$C${r+2}:$C${r+1+len(CCM)}")
 
 r = r + 2 + len(CCM) + 1
 s[f"B{r}"] = "CHEMICAL CLEANING – chemical steps (applied to the total considered volume)"; s[f"B{r}"].font = f_blk
@@ -279,14 +290,14 @@ for i in range(N_STEPS):
 s.cell(row=st1, column=2, value="EXAMPLE – Alkaline degreasing")
 s.cell(row=st1, column=3, value=0.02); s.cell(row=st1, column=4, value=1)
 s.cell(row=st1, column=7, value="Example row – replace with the project's chemical programme")
-name("StepName", f"Settings!$B${st1}:$B${st1+N_STEPS-1}")
-name("StepConc", f"Settings!$C${st1}:$C${st1+N_STEPS-1}")
-name("StepFills", f"Settings!$D${st1}:$D${st1+N_STEPS-1}")
+name("StepName", f"{SS}!$B${st1}:$B${st1+N_STEPS-1}")
+name("StepConc", f"{SS}!$C${st1}:$C${st1+N_STEPS-1}")
+name("StepFills", f"{SS}!$D${st1}:$D${st1+N_STEPS-1}")
 STEP_ROWS = list(range(st1, st1 + N_STEPS))
 r = st1 + N_STEPS + 1
 notes = [
     "LEGEND:  yellow = input (blue text) · green = calculated · drop-downs are provided for units, head types, layout, basis and methods.",
-    "All equipment volumes are calculated in m³. Each input row on 'Volume Calculation' has its own unit drop-down (mm, cm, m, in, ft / kg, t, lb / m³, L, gal …).",
+    f"All equipment volumes are calculated in m³. Each input row on '{SHEET_NAMES['vc']}' has its own unit drop-down (mm, cm, m, in, ft / kg, t, lb / m³, L, gal …).",
     "Head volumes exclude the straight flange; torispherical = ASME F&D approximation. Internals (trays, packing, demisters) are not deducted.",
 ]
 for i, t in enumerate(notes):
@@ -510,6 +521,7 @@ for k in range(1, N_HX + 1):
     R["CHEM"] = calc("Decontamination chemical required",
                      lambda c: f'IF(OR(JobType<>"Decontamination",{g("CONS",c)}=""),"",{g("CONS",c)}*INDEX(DecChem,MATCH("Exchanger",DecTypeU,0))*1000)',
                      nf=NF_L, key="HX_CHEM", unit="L", note="Decon only. Chemical-cleaning chemicals are calculated per step on the Summary")
+    ITEMS.append(("Exchanger", k, R["tag"], R["CONS"]))
     # flag negative shell side
     ws.conditional_formatting.add(f"D{R['ssd']}:H{R['ssd']}",
                                   FormulaRule(formula=[f'AND(ISNUMBER(D{R["ssd"]}),D{R["ssd"]}<0)'], font=Font(color="C00000", bold=True)))
@@ -572,6 +584,7 @@ for k in range(1, N_VES + 1):
                                 f'IFERROR({g("CONS",c)}*INDEX(DecChem,MATCH({g("type",c)},DecTypeU,0))*1000,""))'),
                      nf=NF_L, key="V_CHEM", unit="L", helper_from=R["type"],
                      note="Decon only: column 1% (vapour), vessels 2% (boil-out), tanks per Settings")
+    ITEMS.append(("Vessel", k, R["tag"], R["CONS"]))
     ws.conditional_formatting.add(f"D{R['SEL']}:H{R['SEL']}",
                                   FormulaRule(formula=[f'AND(D{R["b"]}="Water weight",NOT(ISNUMBER(D{R["w"]})))'], fill=PatternFill("solid", fgColor="F4B084")))
     row += 1
@@ -608,6 +621,7 @@ for k in range(1, N_PIPE + 1):
     R["CHEM"] = calc("Decontamination chemical required",
                      lambda c: f'IF(OR(JobType<>"Decontamination",{g("CONS",c)}=""),"",{g("CONS",c)}*INDEX(DecChem,MATCH("Piping",DecTypeU,0))*1000)',
                      nf=NF_L, key="P_CHEM", unit="L")
+    ITEMS.append(("Piping", k, R["tag"], R["CONS"]))
     row += 1
 LAST = row
 ws.print_title_rows = f"{HR}:{HR}"
@@ -622,12 +636,11 @@ for c, w in {"A": 2, "B": 52, "C": 9, "D": 16, "E": 16, "F": 16, "G": 16, "H": 1
     S.column_dimensions[c].width = w
 S["B1"] = '="VOLUME & CHEMICAL SUMMARY – "&UPPER(JobType)'; S["B1"].font = f_title
 S["B2"] = '="Client: "&ProjClient&"   ·   Plant: "&ProjPlant&"   ·   Proposal: "&ProjNo'; S["B2"].font = f_sub
-tags = ",".join(f"'Volume Calculation'!D{r}:H{r}" for r in TAG_ROWS[:1])
 ex_rows = [TAG_ROWS[0], TAG_ROWS[N_HX], TAG_ROWS[N_HX + N_VES]]
-S["B3"] = ("=IF(" + "+".join(f'COUNTIF(\'Volume Calculation\'!D{r}:H{r},"EXAMPLE*")' for r in ex_rows) +
+S["B3"] = ("=IF(" + "+".join(f'COUNTIF({SVC}!D{r}:H{r},"EXAMPLE*")' for r in ex_rows) +
            '>0,"⚠ Example data is still present (Tag starting with EXAMPLE) – delete it before issuing the proposal.","")')
 S["B3"].font = f_red
-VC = "'Volume Calculation'"
+VC = SVC
 srow = 5
 
 
@@ -691,8 +704,8 @@ S[f"B{srow}"] = '=IF(JobType<>"Chemical Cleaning","(Not applicable – job type 
 S[f"B{srow}"].font = f_grey; srow += 1
 step_rows = []
 for k, sr in enumerate(STEP_ROWS):
-    lab = f'=IF(Settings!$B${sr}="","Step {k+1} (not used)",Settings!$B${sr}&"  @ "&TEXT(Settings!$C${sr},"0.0%")&" × "&N(Settings!$D${sr})&" fill(s)")'
-    r = s_row("", lambda i, c, sr=sr: f'IF(OR(JobType<>"Chemical Cleaning",Settings!$C${sr}=""),0,{c}{ctot}*1000*Settings!$C${sr}*IF(N(Settings!$D${sr})=0,1,Settings!$D${sr}))',
+    lab = f'=IF({SS}!$B${sr}="","Step {k+1} (not used)",{SS}!$B${sr}&"  @ "&TEXT({SS}!$C${sr},"0.0%")&" × "&N({SS}!$D${sr})&" fill(s)")'
+    r = s_row("", lambda i, c, sr=sr: f'IF(OR(JobType<>"Chemical Cleaning",{SS}!$C${sr}=""),0,{c}{ctot}*1000*{SS}!$C${sr}*IF(N({SS}!$D${sr})=0,1,{SS}!$D${sr}))',
               unit="L", nf=NF_L)
     S[f"B{r}"] = lab
     step_rows.append(r)
@@ -714,7 +727,7 @@ s_row("", lambda i, c: f"IF({c}{ch}=0,0,ROUNDUP({c}{ch}/IBCL,0))", unit="nos", n
 S[f"B{srow-1}"].value = '="IBCs ("&IBCL&" L each) – rounded up per train"'
 srow += 1
 for t in ["Notes:",
-          "• Volumes per item come from the basis chosen on 'Volume Calculation' (dimensions or water weight).",
+          f"• Volumes per item come from the basis chosen on '{SHEET_NAMES['vc']}' (dimensions or water weight).",
           "• Chemical cleaning: exchangers and piping full volume; vessels / columns / tanks per item (Full fill or 20% + gamma jet circulation).",
           "• Decontamination: columns, exchangers, piping – vapour phase, complete volume, 1% chemical; vessels – boil-out 30% water + 2% chemical with steam injection; "
           "tanks – gamma-jet circulation (heating up to 80 °C if required) – % per Settings (to confirm).",
@@ -725,6 +738,7 @@ S.page_setup.orientation = "landscape"; S.sheet_properties.pageSetUpPr.fitToPage
 S.page_setup.fitToWidth = 1; S.page_setup.fitToHeight = 0
 S.freeze_panes = "D5"
 
-out = sys.argv[1] if len(sys.argv) > 1 else "Cleaning_Decon_Volume_Template.xlsx"
-wb.save(out)
-print("saved", out, "calc rows:", LAST)
+if STANDALONE and __name__ == "__main__":
+    out = sys.argv[1] if len(sys.argv) > 1 else "Cleaning_Decon_Volume_Template.xlsx"
+    wb.save(out)
+    print("saved", out, "calc rows:", LAST)
