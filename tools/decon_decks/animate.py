@@ -75,6 +75,10 @@ def effect_xml(ids, spid, eff, node, dur, delay, is_sp):
     elif e == "exit":
         cls, pid, sub = "exit", 10, 0
         body = _filt(ids, spid, "fade", dur, "out") + _vis(ids, spid, "hidden", max(dur - 1, 0))
+    elif e == "wipeout":
+        cls, pid = "exit", 22
+        sub, flt = WIPE[eff.get("dir", "down")]
+        body = _filt(ids, spid, flt, dur, "out") + _vis(ids, spid, "hidden", max(dur - 1, 0))
     elif e == "vanish":
         cls, pid, sub = "exit", 1, 0
         body = _vis(ids, spid, "hidden")
