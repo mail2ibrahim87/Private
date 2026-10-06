@@ -713,55 +713,83 @@ async function icon(lib, name, color) {
   const nozL = ln(6.5, 1.9, 6.5, 3.65, C.blue, 3);
   const jets = shp(p.shapes.STAR_24_POINT || p.shapes.STAR_16_POINT, { x: 5.55, y: 2.95, w: 1.9, h: 1.9, fill: { color: '7FB8E3', transparency: 45 }, line: { color: C.blue, width: 1, transparency: 30 } });
   const nozzle = shp(p.shapes.OVAL, { x: 6.38, y: 3.78, w: 0.24, h: 0.24, fill: { color: C.blue }, line: { type: 'none' } });
-  lbl('Gamma-jet nozzle', 6.65, 3.3, 1.9, C.blue);
-  // vent to flare (top left)
-  poly([[5.0, 2.3], [5.0, 1.85], [2.7, 1.85]], C.eqL, 3, true);
-  const fl6 = flare(2.5, 1.55);
-  // separator + slop + recirculation
-  shp(p.shapes.ROUNDED_RECTANGLE, { x: 9.6, y: 5.05, w: 1.8, h: 0.6, rectRadius: 0.3, fill: { color: 'EEF2F6' }, line: { color: C.eqL, width: 1.5 } });
-  lbl('Separator', 9.6, 5.68, 1.8, C.muted, 'center');
-  const sucL = poly([[8.8, 5.35], [9.6, 5.35]], C.dirty[1], 4, true);
-  const oilL = poly([[11.4, 5.35], [11.9, 5.35], [11.9, 3.3]], C.oil, 4, true);
-  const [o1, o2] = tankBox(11.2, 2.05, 1.4, 1.25, 'RECOVERED OIL', '8C6A3E');
-  const recL = poly([[10.5, 5.05], [10.5, 1.65], [6.5, 1.65], [6.5, 1.9]], C.blue, 4, true);
-  lbl('Recirculated wash water + chemistry', 7.0, 1.3, 3.4, C.blue);
+  lbl('Gamma-jet nozzle', 5.5, 4.88, 2.0, 'FFFFFF', 'center');
+  // vent through carbon filter (top left)
+  const tk_ventL6 = poly([[5.0, 2.3], [5.0, 1.85], [3.4, 1.85]], C.eqL, 3, true);
+  const tk_cf = shp(p.shapes.ROUNDED_RECTANGLE, { x: 2.6, y: 1.6, w: 0.8, h: 0.9, rectRadius: 0.12, fill: { color: '4A5560' }, line: { color: C.dark, width: 1 } });
+  for (let k = 0; k < 3; k++) ln(2.7, 1.8 + k * 0.25, 3.3, 1.8 + k * 0.25, '7C8794', 1);
+  lbl('CARBON FILTER', 2.2, 2.55, 1.6, C.muted, 'center');
+  const tk_airL = ln(3.0, 1.6, 3.0, 1.3, C.green, 2.5, true);
+  const tk_airT = lbl('treated vent', 3.1, 1.22, 1.4, C.greenD, 'left', 10);
+  // vacuum pump -> sludge waste tank
+  const tk_vacL = poly([[8.8, 5.35], [9.4, 5.35]], C.dirty[1], 4, true);
+  shp(p.shapes.OVAL, { x: 9.4, y: 5.1, w: 0.5, h: 0.5, fill: { color: 'FFFFFF' }, line: { color: C.dark, width: 1.5 } });
+  lbl('Vacuum pump', 8.8, 5.62, 1.2, C.muted, 'center', 10);
+  const tk_vacL2 = poly([[9.9, 5.35], [10.3, 5.35]], C.dirty[1], 4, true);
+  const [tk_w1, tk_w2] = tankBox(10.3, 4.55, 1.5, 1.15, 'SLUDGE → DISPOSAL', C.dirty[0]);
+  // circulation pump, chemistry, effluent
+  const tk_sucL = poly([[8.8, 4.4], [9.9, 4.4]], C.blue, 4, true);
+  shp(p.shapes.OVAL, { x: 9.9, y: 4.15, w: 0.5, h: 0.5, fill: { color: 'FFFFFF' }, line: { color: C.blue, width: 1.5 } });
+  lbl('Circulation pump', 9.3, 3.85, 1.5, C.blue, 'center', 10);
+  const tk_recL = poly([[10.15, 4.15], [10.15, 1.65], [6.5, 1.65], [6.5, 1.9]], C.blue, 4, true);
+  lbl('Recirculated wash water + chemistry', 6.6, 1.3, 3.4, C.blue);
+  const tk_chL = poly([[11.6, 2.1], [10.15, 2.1]], C.green, 3, true);
+  const tk_chT = lbl('DECON CHEMISTRY', 10.4, 1.78, 1.9, C.greenD, 'left', 10);
+  const tk_drL = poly([[10.4, 4.4], [11.0, 4.4], [11.0, 3.6], [11.2, 3.6]], C.eqL, 3, true);
+  const [tk_e1, tk_e2] = tankBox(11.2, 2.85, 1.3, 1.0, 'EFFLUENT TANK');
   const meter6 = gasPanel(0.6, 3.35, 3.0);
   const caps6 = captions([
     'Crude and product tanks: bottom sludge, and benzene, LEL and H₂S in the vapour space – entry is not allowed.',
-    'A gamma-jet nozzle is lowered through the roof manway and wash water with decon chemistry is circulated to it.',
-    'The rotating jets sweep every surface of the tank – shell, roof and floor.',
-    'Sludge is broken up and pumped out; the separator sends recovered oil to the slop tank.',
-    'H₂S is converted into stable compounds; benzene and LEL vapours go to the flare / closed vent.',
-    'The floor and walls are clean – the wash water goes for effluent treatment.',
+    'The tank vent is routed through a carbon filter – vapours are treated before release.',
+    'Bulk sludge is removed first: a vacuum pump transfers it to a waste tank for licensed disposal.',
+    'A gamma-jet nozzle is lowered through the roof manway; wash water with decon chemistry is circulated to it.',
+    'Gamma-jetting and circulation run for 8–12 hours – the jets sweep shell, roof and floor.',
+    'H₂S is converted into stable compounds; benzene and LEL vapours leave through the carbon filter.',
+    'Walls and floor are clean – the spent wash is drained to the effluent tank.',
     'Gas tests confirm the entry criteria – safe entry.']);
   const gH = tag('H₂S', 4.6, 2.9, 1.0, C.h2s), gB = tag('Benzene', 7.4, 2.9, 1.0, C.benz), gL = tag('LEL', 7.4, 3.45, 1.0, C.lel);
   const gS = tag('stable salt', 4.5, 2.9, 1.2, C.salt);
+  // 2 carbon filter vent
   nextCap(caps6, 1);
-  st('with', 'wipe', nozL, { dir: 'up', dur: 700 }); st('with', 'zoom', nozzle, { dur: 300, delay: 600 });
-  recL.forEach((n, k) => st('after', 'wipe', n, { dir: ['down', 'right', 'up'][k] || 'down', dur: 300 }));
+  tk_ventL6.forEach((n, k) => st('with', 'wipe', n, { dir: k === 0 ? 'up' : 'right', dur: 400, delay: k * 400 }));
+  st('with', 'pulse', tk_cf, { dur: 350, scale: 1.1, repeat: 2, delay: 900 });
+  st('with', 'wipe', [tk_airL, tk_airT], { dir: 'down', dur: 400, delay: 1300 });
+  // 3 vacuum out sludge
   nextCap(caps6, 2);
+  st('with', 'wipe', tk_vacL, { dir: 'left', dur: 300 }); st('with', 'wipe', tk_vacL2, { dir: 'left', dur: 300, delay: 300 });
+  packets(C.dirty[0], [[8.8, 5.35], [10.55, 5.35]], 7, 300, 1000, 400, 0.2);
+  st('with', 'exit', sl1, { dur: 2200, delay: 600 });
+  st('with', 'wipe', tk_w1, { dir: 'down', dur: 600, delay: 1400 }); st('with', 'wipe', tk_w2, { dir: 'down', dur: 600, delay: 2200 });
+  // 4 gamma-jet in, circulation
+  nextCap(caps6, 3);
+  st('with', 'wipe', nozL, { dir: 'up', dur: 700 }); st('with', 'zoom', nozzle, { dur: 300, delay: 600 });
+  st('with', 'wipe', tk_sucL, { dir: 'left', dur: 300, delay: 900 });
+  tk_recL.forEach((n, k) => st('with', 'wipe', n, { dir: ['up', 'left', 'down'][k], dur: 300, delay: 1200 + k * 300 }));
+  st('with', 'wipe', [...tk_chL, tk_chT], { dir: 'right', dur: 400, delay: 2200 });
+  // 5 jetting + circulation
+  nextCap(caps6, 4);
   st('with', 'zoom', jets, { dur: 500 });
   st('after', 'pulse', jets, { dur: 350, scale: 1.12, repeat: 8 });
-  packets(C.blue, [[10.5, 5.05], [10.5, 1.65], [6.5, 1.65], [6.5, 3.8]], 6, 400, 1800, 0, 0.18);
-  nextCap(caps6, 3);
-  st('with', 'wipe', sucL, { dir: 'left', dur: 300 });
-  st('with', 'pulse', jets, { dur: 350, scale: 1.12, repeat: 6 });
-  packets(C.dirty[1], [[8.8, 5.35], [9.9, 5.35]], 6, 300, 900, 200, 0.2);
-  st('with', 'exit', sl1, { dur: 2200, delay: 600 });
-  oilL.forEach((n, k) => st('with', 'wipe', n, { dir: k === 0 ? 'left' : 'down', dur: 300, delay: 1200 + k * 300 }));
-  packets(C.oil, [[11.4, 5.35], [11.9, 5.35], [11.9, 3.0]], 5, 300, 1100, 1800, 0.2);
-  st('with', 'wipe', o1, { dir: 'down', dur: 600, delay: 2600 }); st('with', 'wipe', o2, { dir: 'down', dur: 600, delay: 3300 });
-  nextCap(caps6, 4);
+  packets(C.blue, [[8.8, 4.4], [10.15, 4.4], [10.15, 1.65], [6.5, 1.65], [6.5, 3.8]], 7, 400, 2200, 0, 0.18);
+  packets(C.green, [[11.6, 2.1], [10.15, 2.1]], 3, 500, 700, 300, 0.16);
+  // 6 contaminants
+  nextCap(caps6, 5);
   st('with', 'pulse', gH, { dur: 300, scale: 1.2, repeat: 2 });
   st('with', 'exit', gH, { dur: 400, delay: 700 }); st('with', 'fade', gS, { dur: 400, delay: 700 });
-  [[gB, 7.4, 2.9], [gL, 7.4, 3.45]].forEach(([n, x, y], k) => { st('with', 'path', n, { path: [[5.0 - 0.5 - x, 0], [5.0 - 0.5 - x, 1.67 - y], [2.0 - x, 1.67 - y]], dur: 1800, delay: 300 + k * 400 }); st('with', 'exit', n, { dur: 400, delay: 2100 + k * 400 }); });
-  st('with', 'pulse', fl6, { dur: 300, scale: 1.4, repeat: 4, delay: 1900 });
-  nextCap(caps6, 5);
+  [[gB, 7.4, 2.9], [gL, 7.4, 3.45]].forEach(([n, x, y], k) => { st('with', 'path', n, { path: [[5.0 - 0.5 - x, 0], [5.0 - 0.5 - x, 1.67 - y], [2.9 - x, 1.67 - y]], dur: 1800, delay: 300 + k * 400 }); st('with', 'exit', n, { dur: 400, delay: 2100 + k * 400 }); });
+  st('with', 'pulse', tk_cf, { dur: 300, scale: 1.15, repeat: 3, delay: 1900 });
+  // 7 clean + drain
+  nextCap(caps6, 6);
   st('with', 'exit', [gS, sl2, jets], { dur: 800 });
   st('with', 'exit', vt.dark, { dur: 1000, delay: 300 }); st('with', 'exit', vt.mid, { dur: 1000, delay: 1100 }); st('with', 'exit', vt.light, { dur: 1000, delay: 1900 });
+  tk_drL.forEach((n, k) => st('with', 'wipe', n, { dir: ['left', 'up', 'left'][k], dur: 300, delay: 2600 + k * 300 }));
+  packets(C.effl, [[10.4, 4.4], [11.0, 4.4], [11.0, 3.6], [11.5, 3.6]], 4, 300, 1000, 3300, 0.18);
+  st('with', 'wipe', tk_e1, { dir: 'down', dur: 600, delay: 3800 }); st('with', 'wipe', tk_e2, { dir: 'down', dur: 600, delay: 4400 });
   shineSweep(vt);
-  nextCap(caps6, 6);
-  gasPass(meter6, 0.6, 5.0 + 0.25, 3.0);
+  // 8 handover
+  nextCap(caps6, 7);
+  gasPass(meter6, 0.6, 5.25, 3.0);
+  notes('Tanks are atmospheric: no flare. Vapours are vented through a carbon filter. Bulk sludge is vacuumed to a waste tank for licensed disposal (no oil recovery), then gamma-jetting and circulation run for 8–12 hours; spent wash goes to the effluent tank.');
 
   // ===================================================== 19 WHERE DOES EACH CONTAMINANT GO
   slide();
@@ -869,7 +897,7 @@ async function icon(lib, name, color) {
   slide();
   title('Less waste, less exposure');
   const we = [['FaTint', 'Less water than water washing', 'Vapour-phase uses steam already available on the unit.'], ['FaUserShield', 'Less confined-space entry', 'Equipment is gas-free and pyrophoric-safe before it is opened.'],
-    ['FaFlask', 'Controlled effluent', 'Collected in holding tanks, neutralised and tested before disposal.'], ['FaOilCan', 'Oil recovered, not wasted', 'Flushing oil and tank sludge oil go to slop / rerun.']];
+    ['FaFlask', 'Controlled effluent', 'Collected in holding tanks, neutralised and tested before disposal.'], ['FaOilCan', 'Oil recovered, not wasted', 'Flushing oil goes back to slop / rerun.']];
   for (const [i, [ic, t, d]] of we.entries()) {
     const y = 1.55 + i * 1.25;
     const ci = await circleIcon(0.8, y, 0.9, fa, ic, i % 2 ? C.green : C.blue);
