@@ -711,7 +711,9 @@ async function icon(lib, name, color) {
   const sl2 = shp(p.shapes.RECTANGLE, { x: 4.25, y: 5.25, w: 4.5, h: 0.3, fill: { color: C.dirty[1] }, line: { type: 'none' } });
   lbl('Storage tank', 5.5, 5.88, 2.0, C.muted, 'center');
   const nozL = ln(6.5, 1.9, 6.5, 3.65, C.blue, 3);
-  const jets = shp(p.shapes.STAR_24_POINT || p.shapes.STAR_16_POINT, { x: 5.55, y: 2.95, w: 1.9, h: 1.9, fill: { color: '7FB8E3', transparency: 45 }, line: { color: C.blue, width: 1, transparency: 30 } });
+  // water + chemistry spray streams from the nozzle (shown once the pump starts)
+  const jetEnds = [[4.35, 3.0], [4.35, 4.2], [4.5, 5.3], [5.6, 5.45], [7.4, 5.45], [8.5, 5.3], [8.65, 4.2], [8.65, 3.0], [5.3, 2.6], [7.7, 2.6]];
+  const jets = jetEnds.map(([x, y]) => ln(6.5, 3.9, x, y, '9CCBEC', 2.5));
   const nozzle = shp(p.shapes.OVAL, { x: 6.38, y: 3.78, w: 0.24, h: 0.24, fill: { color: C.blue }, line: { type: 'none' } });
   lbl('Gamma-jet nozzle', 5.5, 4.88, 2.0, 'FFFFFF', 'center');
   // vent through carbon filter (top left)
@@ -768,10 +770,10 @@ async function icon(lib, name, color) {
   st('with', 'wipe', [...tk_chL, tk_chT], { dir: 'right', dur: 400, delay: 2200 });
   // 5 jetting + circulation
   nextCap(caps6, 4);
-  st('with', 'zoom', jets, { dur: 500 });
-  st('after', 'pulse', jets, { dur: 350, scale: 1.12, repeat: 8 });
   packets(C.blue, [[8.8, 4.4], [10.15, 4.4], [10.15, 1.65], [6.5, 1.65], [6.5, 3.8]], 7, 400, 2200, 0, 0.18);
   packets(C.green, [[11.6, 2.1], [10.15, 2.1]], 3, 500, 700, 300, 0.16);
+  st('with', 'fade', jets, { dur: 600, delay: 2000 });
+  for (let r = 0; r < 3; r++) jetEnds.forEach(([x, y], k) => travel(k % 2 ? C.green : '5DADE2', [[6.5, 3.9], [x, y]], 2200 + r * 700 + (k % 5) * 120, 650, 0.13));
   // 6 contaminants
   nextCap(caps6, 5);
   st('with', 'pulse', gH, { dur: 300, scale: 1.2, repeat: 2 });
@@ -780,7 +782,7 @@ async function icon(lib, name, color) {
   st('with', 'pulse', tk_cf, { dur: 300, scale: 1.15, repeat: 3, delay: 1900 });
   // 7 clean + drain
   nextCap(caps6, 6);
-  st('with', 'exit', [gS, sl2, jets], { dur: 800 });
+  st('with', 'exit', [gS, sl2, ...jets], { dur: 800 });
   st('with', 'exit', vt.dark, { dur: 1000, delay: 300 }); st('with', 'exit', vt.mid, { dur: 1000, delay: 1100 }); st('with', 'exit', vt.light, { dur: 1000, delay: 1900 });
   tk_drL.forEach((n, k) => st('with', 'wipe', n, { dir: ['left', 'up', 'left'][k], dur: 300, delay: 2600 + k * 300 }));
   packets(C.effl, [[10.4, 4.4], [11.0, 4.4], [11.0, 3.6], [11.5, 3.6]], 4, 300, 1000, 3300, 0.18);
