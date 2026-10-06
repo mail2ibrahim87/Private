@@ -541,17 +541,22 @@ async function icon(lib, name, color) {
   // ===================================================== 16 CHEMICAL CIRCULATION
   slide();
   title('Chemical circulation – tanks & heat-limited vessels');
-  const vc = staged(5.0, 2.05, 3.4, 3.15, 0.3);
-  lbl('Tank / temperature-limited vessel', 4.7, 5.22, 4.0, C.muted, 'center');
-  txt('No steam: lined, coated or low design temperature', { x: 4.7, y: 5.5, w: 4.0, h: 0.3, fontSize: 11, italic: true, color: C.muted, align: 'center' });
+  // horizontal vessel on saddles (temperature-limited)
+  [5.25, 7.55].forEach((x) => shp(p.shapes.TRAPEZOID, { x, y: 4.3, w: 0.6, h: 0.6, fill: { color: 'CBD5E1' }, line: { color: C.eqL, width: 1 } }));
+  shp(p.shapes.RECTANGLE, { x: 4.9, y: 4.88, w: 3.6, h: 0.06, fill: { color: C.eqL }, line: { type: 'none' } });
+  [[5.22, 2.4], [7.92, 2.4]].forEach(([x, y]) => shp(p.shapes.RECTANGLE, { x, y, w: 0.16, h: 0.3, fill: { color: 'CBD5E1' }, line: { color: C.eqL, width: 1 } }));
+  [[4.87, 4.2], [8.32, 4.2]].forEach(([x, y]) => shp(p.shapes.RECTANGLE, { x, y, w: 0.16, h: 0.3, fill: { color: 'CBD5E1' }, line: { color: C.eqL, width: 1 } }));
+  const vc = staged(4.6, 2.6, 4.2, 1.9, 0.95);
+  lbl('Horizontal vessel – temperature-limited', 4.4, 4.98, 4.6, C.muted, 'center');
+  txt('No steam: lined, coated or low design temperature', { x: 4.4, y: 5.28, w: 4.6, h: 0.3, fontSize: 11, italic: true, color: C.muted, align: 'center' });
   // vent
-  ln(7.6, 2.05, 7.6, 1.4, C.eqL, 3, true); lbl('to flare / closed vent', 7.75, 1.3, 2.2, C.muted);
+  ln(8.0, 2.4, 8.0, 1.6, C.eqL, 3, true); lbl('to flare / closed vent', 5.9, 1.5, 2.0, C.muted, 'right');
   // skid
   const mixT = [shp(p.shapes.ROUNDED_RECTANGLE, { x: 0.8, y: 3.6, w: 1.4, h: 1.4, rectRadius: 0.15, fill: { color: 'EAF6EC' }, line: { color: C.green, width: 1.5 } }),
     txt('Mixing tank', { x: 0.6, y: 5.05, w: 1.8, h: 0.3, fontSize: 11, bold: true, color: C.muted, align: 'center' })];
   const pumpC = [shp(p.shapes.OVAL, { x: 3.0, y: 5.45, w: 0.45, h: 0.45, fill: { color: 'FFFFFF' }, line: { color: C.eqL, width: 1.5 } }),
     txt('Pump skid', { x: 2.75, y: 5.92, w: 1.0, h: 0.3, fontSize: 10, bold: true, color: C.muted, align: 'center' })];
-  const hoses = [poly([[1.5, 5.0], [1.5, 5.67], [3.0, 5.67]], C.green, 4), poly([[3.45, 5.67], [4.6, 5.67], [4.6, 4.8], [5.0, 4.8]], C.green, 4, true), poly([[5.0, 2.6], [1.5, 2.6], [1.5, 3.6]], C.green, 4, true)].flat();
+  const hoses = [poly([[1.5, 5.0], [1.5, 5.67], [3.0, 5.67]], C.green, 4), poly([[3.45, 5.67], [4.95, 5.67], [4.95, 4.5]], C.green, 4, true), poly([[5.3, 2.4], [5.3, 2.2], [1.5, 2.2], [1.5, 3.6]], C.green, 4, true)].flat();
   // monitor panel
   shp(p.shapes.ROUNDED_RECTANGLE, { x: 9.2, y: 1.55, w: 3.5, h: 2.75, rectRadius: 0.12, fill: { color: C.panel }, line: { color: C.border, width: 1 } });
   lbl('RETURN-LINE MONITORING', 9.4, 1.67, 3.2, C.greenD, 'left', 12);
@@ -559,25 +564,25 @@ async function icon(lib, name, color) {
     txt(g, { x: 9.4, y: 2.1 + k * 0.5, w: 1.2, h: 0.4, fontSize: 14, bold: true, color: C.dark });
     return [txt(a, { x: 10.7, y: 2.1 + k * 0.5, w: 1.9, h: 0.4, fontSize: 13, bold: true, color: C.h2s }), txt(b, { x: 10.7, y: 2.1 + k * 0.5, w: 1.9, h: 0.4, fontSize: 13, bold: true, color: C.greenD })];
   });
-  poly([[8.4, 4.95], [10.95, 4.95]], C.eqL, 3, true);
-  const [c1l, c2l] = tankBox(10.95, 4.5, 1.5, 1.15, 'EFFLUENT TANK');
+  poly([[8.4, 4.5], [8.4, 4.75], [10.95, 4.75]], C.eqL, 3, true);
+  const [c1l, c2l] = tankBox(10.95, 4.3, 1.5, 1.15, 'EFFLUENT TANK');
   const caps4 = captions([
-    'Tanks and temperature-limited vessels (lined, coated, low design temperature) cannot be steamed.',
+    'Temperature-limited vessels (lined, coated, low design temperature) cannot be steamed.',
     'A temporary circulation skid is set up: mixing tank and pump, hosed to the equipment.',
     'Decon solution is circulated continuously through the equipment and back to the mixing tank.',
     'H₂S is converted into stable compounds and FeS is oxidised; LEL / benzene vapours are vented to the flare.',
     'The return line is monitored until H₂S is low, pH is neutral and the iron level is stable.',
     'The solution is drained to the effluent tank and a neutralising rinse follows.',
     'Gas tests confirm the entry criteria – safe entry.']);
-  const cH = tag('H₂S', 5.5, 2.45, 1.0, C.h2s), cB = tag('Benzene', 6.7, 2.45, 1.0, C.benz);
-  const cG = shp(p.shapes.ROUNDED_RECTANGLE, { x: 5.43, y: 4.2, w: 1.14, h: 0.5, rectRadius: 0.25, fill: { color: C.glow, transparency: 55 }, line: { color: C.glow, width: 2 } });
-  const cF = tag('FeS', 5.5, 4.27, 1.0, C.fes);
-  const cS = tag('stable salt', 5.4, 2.45, 1.2, C.salt), cO = tag('iron oxide', 5.4, 4.27, 1.2, C.oxide);
+  const cH = tag('H₂S', 5.6, 2.85, 1.0, C.h2s), cB = tag('Benzene', 6.9, 2.85, 1.0, C.benz);
+  const cG = shp(p.shapes.ROUNDED_RECTANGLE, { x: 6.13, y: 3.78, w: 1.14, h: 0.5, rectRadius: 0.25, fill: { color: C.glow, transparency: 55 }, line: { color: C.glow, width: 2 } });
+  const cF = tag('FeS', 6.2, 3.85, 1.0, C.fes);
+  const cS = tag('stable salt', 5.5, 2.85, 1.2, C.salt), cO = tag('iron oxide', 6.1, 3.85, 1.2, C.oxide);
   st('with', 'pulse', cG, { dur: 500, scale: 1.08, repeat: 3, delay: 400 });
   nextCap(caps4, 1);
   st('with', 'ascend', [...mixT, ...pumpC], { dur: 700 });
   hoses.forEach((h2, k) => st('after', 'wipe', h2, { dir: [ 'down', 'left', 'left', 'left', 'down', 'left', 'right', 'down'][k] || 'left', dur: 250 }));
-  const circPts = [[1.5, 5.0], [1.5, 5.67], [4.6, 5.67], [4.6, 4.8], [5.6, 4.8], [5.6, 2.6], [1.5, 2.6], [1.5, 3.6]];
+  const circPts = [[1.5, 5.0], [1.5, 5.67], [4.95, 5.67], [4.95, 4.3], [5.3, 3.5], [5.3, 2.2], [1.5, 2.2], [1.5, 3.6]];
   nextCap(caps4, 2);
   packets(C.green, circPts, 9, 450, 4200);
   nextCap(caps4, 3);
@@ -585,7 +590,7 @@ async function icon(lib, name, color) {
   st('with', 'pulse', cH, { dur: 300, scale: 1.2, repeat: 2 });
   st('with', 'exit', cH, { dur: 400, delay: 700 }); st('with', 'fade', cS, { dur: 400, delay: 700 });
   st('with', 'exit', [cG, cF], { dur: 500, delay: 1200 }); st('with', 'fade', cO, { dur: 500, delay: 1200 });
-  st('with', 'path', cB, { path: [[0.9, -0.9], [0.9, -1.4]], dur: 1400, delay: 1500 }); st('with', 'exit', cB, { dur: 400, delay: 2900 });
+  st('with', 'path', cB, { path: [[0.6, -0.65], [0.6, -1.35]], dur: 1400, delay: 1500 }); st('with', 'exit', cB, { dur: 400, delay: 2900 });
   st('with', 'exit', vc.dark, { dur: 1500, delay: 1800 });
   nextCap(caps4, 4);
   packets(C.green, circPts, 6, 500, 4200);
@@ -594,13 +599,13 @@ async function icon(lib, name, color) {
   dripsAway(vc, 800);
   nextCap(caps4, 5);
   st('with', 'exit', [cS, cO], { dur: 500 });
-  packets(C.salt, [[8.2, 4.95], [11.2, 4.95]], 5, 300, 1200, 200);
+  packets(C.salt, [[8.4, 4.4], [8.4, 4.75], [11.2, 4.75]], 5, 300, 1200, 200);
   st('with', 'wipe', c1l, { dir: 'down', dur: 600, delay: 900 }); st('with', 'wipe', c2l, { dir: 'down', dur: 600, delay: 1600 });
   st('with', 'exit', vc.light, { dur: 1200, delay: 1200 });
   shineSweep(vc);
   nextCap(caps4, 6);
   st('with', 'vanish', mon[3][0], { delay: 300 }); st('with', 'zoom', mon[3][1], { dur: 400, delay: 300 });
-  badge('✓  READY FOR SAFE ENTRY', 5.0, 5.82, 3.4);
+  badge('✓  READY FOR SAFE ENTRY', 5.0, 5.65, 3.4);
   notes('Used where steam is not allowed: tanks and lined / coated / low-design-temperature vessels.');
 
   // ===================================================== 17 PACKING PRE- & POST-TREATMENT
