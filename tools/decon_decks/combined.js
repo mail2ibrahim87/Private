@@ -25,6 +25,14 @@ async function icon(lib, name, color) {
   return 'image/png;base64,' + (await sharp(Buffer.from(svg)).png().toBuffer()).toString('base64');
 }
 
+// soft background with decorative circles baked in and trimmed to the slide edge (nothing spills outside in edit view)
+async function circlesBg(circles) {
+  const k = 150, Wp = Math.round(13.333 * k), Hp = Math.round(7.5 * k);
+  const body = circles.map(([x, y, d, col]) => `<circle cx="${(x + d / 2) * k}" cy="${(y + d / 2) * k}" r="${(d / 2) * k}" fill="#${col}"/>`).join('');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${Wp}" height="${Hp}"><rect width="100%" height="100%" fill="#${C.soft}"/>${body}</svg>`;
+  return 'image/png;base64,' + (await sharp(Buffer.from(svg)).png().toBuffer()).toString('base64');
+}
+
 (async () => {
   const p = new pptxgen();
   p.layout = 'LAYOUT_WIDE';
@@ -35,6 +43,8 @@ async function icon(lib, name, color) {
   p.defineSlideMaster({ title: 'WHITE', background: { color: 'FFFFFF' }, objects: [{ image: { x: 12.33, y: 0.3, w: 0.55, h: 0.72, data: LOGO } }],
     slideNumber: { x: 12.35, y: 7.05, w: 0.6, h: 0.3, fontFace: 'Calibri', fontSize: 10, color: C.muted, align: 'right' } });
 
+  const BG_TWO = await circlesBg([[9.0, -1.4, 5.8, C.tintB], [10.6, 4.3, 3.8, C.tintG]]);
+  const BG_ONE = await circlesBg([[9.6, 1.2, 5.0, C.tintB]]);
   const spec = [];
   let s, A, uid = 0;
   const slide = (master = 'WHITE', tr = 'fade') => { s = p.addSlide({ masterName: master }); A = { transition: tr, steps: [] }; spec.push(A); return s; };
@@ -127,8 +137,7 @@ async function icon(lib, name, color) {
 
   // ===================================================== 1 TITLE
   slide('SOFT');
-  shp(p.shapes.OVAL, { x: 9.0, y: -1.4, w: 5.8, h: 5.8, fill: { color: C.tintB }, line: { type: 'none' } });
-  shp(p.shapes.OVAL, { x: 10.6, y: 4.3, w: 3.8, h: 3.8, fill: { color: C.tintG }, line: { type: 'none' } });
+  s.background = { data: BG_TWO };
   img(LOGO, { x: 0.75, y: 0.6, w: 1.0, h: 1.31 });
   txt('DECONTAMINATION SERVICES', { x: 0.75, y: 2.55, w: 8.5, h: 0.4, fontSize: 16, bold: true, color: C.greenD, charSpacing: 4 });
   txt('Safe, fast entry – across the oil & gas value chain', { x: 0.75, y: 3.0, w: 8.8, h: 1.7, fontFace: 'Cambria', fontSize: 40, bold: true, color: C.dark, valign: 'top' });
@@ -298,7 +307,7 @@ async function icon(lib, name, color) {
   // ===================================================== 11 DIVIDER methods
   const divider = (num, t, sub) => {
     slide('SOFT');
-    shp(p.shapes.OVAL, { x: 9.6, y: 1.2, w: 5.0, h: 5.0, fill: { color: C.tintB }, line: { type: 'none' } });
+    s.background = { data: BG_ONE };
     img(LOGO, { x: 12.33, y: 0.3, w: 0.55, h: 0.72 });
     txt(num, { x: 0.75, y: 1.75, w: 3, h: 1.2, fontFace: 'Cambria', fontSize: 66, bold: true, color: C.blue });
     const a = txt(t, { x: 0.75, y: 3.2, w: 8.5, h: 1.35, fontFace: 'Cambria', fontSize: 34, bold: true, color: C.dark, valign: 'bottom' });
@@ -928,8 +937,7 @@ async function icon(lib, name, color) {
   }
   // 27 closing
   slide('SOFT');
-  shp(p.shapes.OVAL, { x: 9.0, y: -1.4, w: 5.8, h: 5.8, fill: { color: C.tintB }, line: { type: 'none' } });
-  shp(p.shapes.OVAL, { x: 10.6, y: 4.3, w: 3.8, h: 3.8, fill: { color: C.tintG }, line: { type: 'none' } });
+  s.background = { data: BG_TWO };
   img(LOGO, { x: 0.75, y: 0.6, w: 1.0, h: 1.31 });
   txt('Thank you', { x: 0.75, y: 2.35, w: 8, h: 1.0, fontFace: 'Cambria', fontSize: 44, bold: true, color: C.dark });
   txt('Let’s plan the decontamination for your next shutdown.', { x: 0.75, y: 3.4, w: 8.5, h: 0.9, fontSize: 20, color: C.head, valign: 'top' });
