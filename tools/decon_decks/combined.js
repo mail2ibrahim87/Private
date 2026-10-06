@@ -151,7 +151,7 @@ async function icon(lib, name, color) {
     st(i === 0 ? 'click' : 'after', 'ascend', [c1, ...ci, tt, dd], { dur: 600 });
   }
   const wb = shp(p.shapes.ROUNDED_RECTANGLE, { x: 0.6, y: 5.6, w: 12.1, h: 0.9, rectRadius: 0.1, fill: { color: 'EAF6EC' }, line: { type: 'none' } });
-  const wt = txt([{ text: 'Decontamination at Delight:  ', options: { bold: true, color: C.greenD } }, { text: 'vapour-phase, boil-out, viscosity flush, chemical circulation, packing pre-treatment and tank gamma-jet – planned, executed and validated by one team.' }],
+  const wt = txt([{ text: 'Decontamination at Delight:  ', options: { bold: true, color: C.greenD } }, { text: 'vapour-phase, boil-out, viscosity flush, chemical circulation, packing pre- & post-treatment and tank gamma-jet – planned, executed and validated by one team.' }],
     { x: 0.85, y: 5.6, w: 11.6, h: 0.9, fontSize: 15, color: C.dark });
   st('click', 'fade', [wb, wt]);
 
@@ -310,7 +310,7 @@ async function icon(lib, name, color) {
   // ===================================================== 12 WHICH METHOD WHERE
   slide();
   title('Which method, where?');
-  const M = ['Vapour-phase', 'Boil-out', 'Viscosity flush', 'Circulation', 'Packing pre-treat', 'Gamma-jet'];
+  const M = ['Vapour-phase', 'Boil-out', 'Viscosity flush', 'Circulation', 'Pre/post-treat', 'Gamma-jet'];
   const EQ = [['Columns & towers', [2, 0, 1, 0, 1, 0]], ['Drums, separators & desalters', [1, 2, 0, 0, 0, 0]], ['Heavy bottoms, coker & quench oil', [2, 1, 2, 0, 0, 0]],
     ['Exchangers & air coolers', [2, 0, 1, 2, 0, 0]], ['Packed beds & trays', [1, 0, 0, 0, 2, 0]], ['Tanks & temperature-limited vessels', [0, 0, 0, 2, 0, 2]]];
   const gx = 4.3, cw = 1.4;
@@ -603,49 +603,102 @@ async function icon(lib, name, color) {
   badge('✓  READY FOR SAFE ENTRY', 5.0, 5.82, 3.4);
   notes('Used where steam is not allowed: tanks and lined / coated / low-design-temperature vessels.');
 
-  // ===================================================== 17 PACKING PRE-TREATMENT
+  // ===================================================== 17 PACKING PRE- & POST-TREATMENT
   slide();
-  title('Packing pre-treatment – pyrophoric beds');
-  shp(p.shapes.ROUNDED_RECTANGLE, { x: 5.4, y: 1.7, w: 1.4, h: 4.0, rectRadius: 0.7, fill: { color: 'EEF2F6' }, line: { color: C.blue, width: 2 } });
-  const glows = [], beds = [2.15, 3.25, 4.35];
+  title('Packing pre- & post-treatment – packed columns');
+  // phase chips (left)
+  const pk_phases = ['1   PRE-TREATMENT', '2   VAPOUR-PHASE', '3   POST-TREATMENT'], pk_phCol = [C.green, C.blue, C.green];
+  const pk_phOn = pk_phases.map((t, k) => {
+    s.addText(t, { shape: p.shapes.ROUNDED_RECTANGLE, rectRadius: 0.19, x: 0.6, y: 1.55 + k * 0.48, w: 3.3, h: 0.38, fill: { color: C.panel }, line: { color: C.border, width: 1 },
+      fontSize: 12, bold: true, color: C.muted, fontFace: 'Calibri', margin: 0, align: 'center', valign: 'middle', objectName: `ph${k}` });
+    return tag(t, 0.6, 1.55 + k * 0.48, 3.3, pk_phCol[k]);
+  });
+  // column with packed beds
+  shp(p.shapes.ROUNDED_RECTANGLE, { x: 5.4, y: 1.85, w: 1.4, h: 3.95, rectRadius: 0.7, fill: { color: 'EEF2F6' }, line: { color: C.blue, width: 2 } });
+  const beds = [2.3, 3.35, 4.4], pk_dirtB = [], pk_films = [], glows = [];
   beds.forEach((y) => {
     shp(p.shapes.RECTANGLE, { x: 5.5, y, w: 1.2, h: 0.75, fill: { color: 'C9B9A3' }, line: { color: C.eqL, width: 1 } });
     for (let k = 0; k < 5; k++) ln(5.5 + k * 0.24, y, 5.74 + k * 0.24, y + 0.75, '9C8A70', 0.75);
+    pk_dirtB.push(shp(p.shapes.RECTANGLE, { x: 5.5, y, w: 1.2, h: 0.75, fill: { color: C.dirty[1], transparency: 15 }, line: { color: C.dirty[0], width: 1 } }));
+    pk_films.push(shp(p.shapes.RECTANGLE, { x: 5.44, y: y - 0.04, w: 1.32, h: 0.83, fill: { color: C.green, transparency: 70 }, line: { color: C.green, width: 2.5 } }));
     glows.push(shp(p.shapes.RECTANGLE, { x: 5.42, y: y - 0.05, w: 1.36, h: 0.85, fill: { color: C.glow, transparency: 45 }, line: { color: C.glow, width: 2 } }));
   });
-  lbl('Packed column', 5.1, 5.72, 2.0, C.muted, 'center');
-  const warn = [shp(p.shapes.ISOSCELES_TRIANGLE, { x: 7.6, y: 2.3, w: 0.9, h: 0.8, fill: { color: 'F7C548' }, line: { color: C.glow, width: 1.5 } }),
-    txt('!', { x: 7.6, y: 2.45, w: 0.9, h: 0.6, fontSize: 24, bold: true, color: C.dark, align: 'center' })];
-  const warnT = txt('Pyrophoric FeS – self-heats and can ignite when the column is opened to air', { x: 8.85, y: 2.25, w: 3.7, h: 0.9, fontSize: 14, bold: true, color: C.h2s });
-  lbl('OXIDISER SOLUTION', 2.3, 1.3, 2.2, C.greenD, 'left', 12);
-  const oxL = poly([[3.3, 1.6], [6.1, 1.6], [6.1, 1.75]], C.green, 4, true);
-  const oxTags = beds.map((y) => tag('FeS → iron oxide', 7.0, y + 0.2, 1.8, C.oxide));
-  poly([[6.1, 5.7], [6.1, 6.0], [9.6, 6.0], [9.6, 5.55], [10.0, 5.55]], C.eqL, 3, true);
+  lbl('Packed column', 5.1, 5.82, 2.0, C.muted, 'center');
+  // top feed (pre-treat chemistry, later oxidiser)
+  const pk_feedL = poly([[4.3, 1.55], [6.1, 1.55], [6.1, 1.85]], C.green, 4, true);
+  const pk_fl1 = lbl('PRE-TREAT CHEMISTRY', 4.0, 1.22, 2.4, C.greenD, 'left', 12);
+  const pk_fl2 = lbl('OXIDISER SOLUTION', 4.0, 1.22, 2.4, C.greenD, 'left', 12);
+  // steam in at bottom, vapours to flare
+  const pk_stL = poly([[4.2, 5.3], [5.4, 5.3]], C.steam, 4, true);
+  const pk_stT = lbl('STEAM', 4.2, 4.98, 1.0, C.steam, 'left', 12);
+  const pk_ventL = poly([[6.45, 1.9], [6.45, 1.6], [9.4, 1.6], [9.4, 2.3], [9.6, 2.3]], C.eqL, 3, true);
+  const pk_fl = flare(9.6, 1.9);
+  // bed tags
+  const pk_filmTags = beds.map((y) => tag('Packing pre-wetted', 7.0, y + 0.2, 2.0, C.green));
+  const pk_hcTags = [tag('Benzene', 7.0, beds[0] + 0.2, 1.3, C.benz), tag('LEL', 7.0, beds[1] + 0.2, 1.3, C.lel)];
+  const oxTags = beds.map((y) => tag('FeS → iron oxide', 7.0, y + 0.2, 2.0, C.oxide));
+  const warn = [shp(p.shapes.ISOSCELES_TRIANGLE, { x: 7.0, y: 5.05, w: 0.62, h: 0.55, fill: { color: 'F7C548' }, line: { color: C.glow, width: 1.5 } }),
+    txt('!', { x: 7.0, y: 5.15, w: 0.62, h: 0.42, fontSize: 18, bold: true, color: C.dark, align: 'center' })];
+  const warnT = txt('Pyrophoric FeS left on the packing – ignites in air', { x: 7.75, y: 5.0, w: 2.15, h: 0.7, fontSize: 13, bold: true, color: C.h2s });
+  // drain to effluent
+  poly([[6.1, 5.8], [6.1, 6.05], [9.6, 6.05], [9.6, 5.55], [10.0, 5.55]], C.eqL, 3, true);
   const [p1, p2] = tankBox(10.0, 4.75, 1.5, 1.2, 'EFFLUENT TANK');
-  const meter5 = gasPanel(0.6, 1.9, 3.3);
+  const meter5 = gasPanel(0.6, 3.15, 3.3);
   const caps5 = captions([
-    'Packed beds and trays in sour service are coated with pyrophoric iron sulphide.',
-    'Opened to air, the FeS self-heats – a real risk of fire in the packing.',
-    'An oxidiser solution is fed from the top and trickles through every bed.',
-    'Bed by bed, FeS is oxidised to stable iron oxide – the heat risk is gone.',
-    'The spent solution drains to the effluent tank.',
+    'Packed beds hold hydrocarbon film and pyrophoric iron sulphide deep inside the packing geometry.',
+    'PRE-TREATMENT: decon chemistry is fed from the top and coats every surface of the packing.',
+    'With the packing pre-wetted, the vapour-phase that follows reaches deep into every bed.',
+    'VAPOUR-PHASE: steam carries the chemistry up through the beds – LEL and benzene go to flare.',
+    'Pyrophoric FeS can remain on the packing – it would self-heat once the column is opened.',
+    'POST-TREATMENT: an oxidiser wash trickles through each bed – FeS becomes stable iron oxide.',
+    'The spent wash drains to the effluent tank.',
     'Gas tests pass – the column is safe to open and the packing safe to unload.']);
-  st('with', 'pulse', glows, { dur: 500, scale: 1.04, repeat: 3, delay: 300 });
+  st('with', 'pulse', pk_dirtB, { dur: 500, scale: 1.04, repeat: 2, delay: 300 });
+  // 2 pre-treatment
   nextCap(caps5, 1);
-  st('with', 'zoom', [...warn, warnT], { dur: 500 });
-  st('after', 'pulse', warn, { dur: 400, scale: 1.15, repeat: 3 });
+  st('with', 'fade', pk_phOn[0], { dur: 400 });
+  st('with', 'fade', pk_fl1, { dur: 400 });
+  pk_feedL.forEach((n, k) => st('with', 'wipe', n, { dir: k === 0 ? 'left' : 'down', dur: 400, delay: k * 400 }));
+  for (let k = 0; k < 10; k++) travel(C.green, [[5.65 + (k % 5) * 0.22, 1.95], [5.65 + (k % 5) * 0.22, 5.4]], 900 + k * 220, 2200, 0.16);
+  pk_films.forEach((f, k) => { st('with', 'fade', f, { dur: 600, delay: 1400 + k * 700 }); st('with', 'ascend', pk_filmTags[k], { dur: 500, delay: 1400 + k * 700 }); });
+  // 3 enhanced vapour-phase
   nextCap(caps5, 2);
-  oxL.forEach((n, k) => st(k === 0 ? 'with' : 'after', 'wipe', n, { dir: k === 0 ? 'left' : 'up', dur: 400 }));
-  for (let k = 0; k < 10; k++) travel(C.green, [[5.65 + (k % 5) * 0.22, 1.85], [5.65 + (k % 5) * 0.22, 5.45]], 500 + k * 220, 2200, 0.16);
+  st('with', 'pulse', pk_films, { dur: 450, scale: 1.05, repeat: 2 });
+  // 4 vapour-phase
   nextCap(caps5, 3);
-  st('with', 'exit', [...warn, warnT], { dur: 500 });
-  glows.forEach((g, k) => { st('with', 'exit', g, { dur: 700, delay: 400 + k * 900 }); st('with', 'ascend', oxTags[k], { dur: 500, delay: 400 + k * 900 }); });
+  st('with', 'exit', [pk_phOn[0], pk_fl1, ...pk_filmTags], { dur: 400 });
+  st('with', 'fade', pk_phOn[1], { dur: 400 });
+  st('with', 'wipe', [...pk_stL, pk_stT], { dir: 'left', dur: 500, delay: 300 });
+  for (let k = 0; k < 12; k++) travel(C.steam, [[5.6 + (k % 4) * 0.33, 5.3], [5.6 + (k % 4) * 0.33, 2.05]], 700 + k * 200, 1800, 0.18);
+  st('with', 'fade', pk_hcTags, { dur: 400, delay: 900 });
+  pk_ventL.forEach((n, k) => st('with', 'wipe', n, { dir: ['up', 'left', 'down', 'left'][k], dur: 300, delay: 1200 + k * 300 }));
+  pk_hcTags.forEach((t, k) => { st('with', 'path', t, { path: [[-0.55, -0.9 - k * 1.05], [2.3, -1.05 - k * 1.05], [2.6, -0.4 - k * 1.05]], dur: 1500, delay: 2600 + k * 500 });
+    st('with', 'exit', t, { dur: 300, delay: 4000 + k * 500 }); });
+  st('with', 'pulse', pk_fl, { dur: 350, scale: 1.25, repeat: 3, delay: 3800 });
+  pk_dirtB.forEach((d, k) => st('with', 'exit', d, { dur: 800, delay: 2400 + k * 700 }));
+  pk_films.forEach((f, k) => st('with', 'exit', f, { dur: 800, delay: 2400 + k * 700 }));
+  meter5.forEach(([bad, ok], k) => { st('with', 'vanish', bad, { delay: 4600 + k * 400 }); st('with', 'zoom', ok, { dur: 400, delay: 4600 + k * 400 }); });
+  // 5 pyrophoric residue
   nextCap(caps5, 4);
-  st('with', 'exit', oxTags, { dur: 500 });
-  for (let k = 0; k < 5; k++) travel(C.oxide, [[6.1, 5.4], [6.1, 6.0], [9.6, 6.0], [9.6, 5.55], [10.25, 5.55]], 300 + k * 250, 1800);
-  st('with', 'wipe', p1, { dir: 'down', dur: 600, delay: 1500 }); st('with', 'wipe', p2, { dir: 'down', dur: 600, delay: 2200 });
+  st('with', 'fade', glows, { dur: 500 });
+  st('after', 'pulse', glows, { dur: 450, scale: 1.04, repeat: 3 });
+  st('with', 'zoom', [...warn, warnT], { dur: 500 });
+  // 6 post-treatment
   nextCap(caps5, 5);
-  gasPass(meter5, 0.6, 4.1, 3.3, '✓  SAFE TO OPEN & UNLOAD');
+  st('with', 'exit', pk_phOn[1], { dur: 400 });
+  st('with', 'fade', [pk_phOn[2], pk_fl2], { dur: 400 });
+  for (let k = 0; k < 10; k++) travel(C.green, [[5.65 + (k % 5) * 0.22, 1.95], [5.65 + (k % 5) * 0.22, 5.4]], 400 + k * 220, 2200, 0.16);
+  st('with', 'exit', [...warn, warnT], { dur: 500, delay: 800 });
+  glows.forEach((g, k) => { st('with', 'exit', g, { dur: 700, delay: 1000 + k * 900 }); st('with', 'ascend', oxTags[k], { dur: 500, delay: 1000 + k * 900 }); });
+  // 7 drain
+  nextCap(caps5, 6);
+  st('with', 'exit', oxTags, { dur: 500 });
+  for (let k = 0; k < 5; k++) travel(C.oxide, [[6.1, 5.5], [6.1, 6.05], [9.6, 6.05], [9.6, 5.55], [10.25, 5.55]], 300 + k * 250, 1800);
+  st('with', 'wipe', p1, { dir: 'down', dur: 600, delay: 1500 }); st('with', 'wipe', p2, { dir: 'down', dur: 600, delay: 2200 });
+  // 8 handover
+  nextCap(caps5, 7);
+  badge('✓  SAFE TO OPEN & UNLOAD', 0.6, 5.3, 3.3);
+  notes('Pre-treatment and post-treatment use the same circulation/spray route. Pre-treatment coats the packing geometry so the vapour-phase works deeper; post-treatment is the oxidation wash for pyrophoric FeS before opening.');
 
   // ===================================================== 18 TANK GAMMA-JET
   slide();
@@ -751,7 +804,7 @@ async function icon(lib, name, color) {
   const tk = [['FaWind', 'Vapour-phase degreaser', 'Carried by steam; lifts hydrocarbons and releases LEL / benzene for safe venting.', 'Columns, overheads, exchangers'],
     ['FaTint', 'Water-based solvent', 'Emulsifies oil and sludge in water; non-flammable, low odour.', 'Boil-out, circulation, tanks'],
     ['FaOilCan', 'Oil-based solvent', 'Boosts flushing oil to penetrate heavy deposits, tar and coke.', 'Viscosity flush, coker, quench oil'],
-    ['FaShieldAlt', 'Sulphide / pyrophoric oxidiser', 'Converts H₂S and pyrophoric FeS into stable compounds.', 'Packed beds, amine, SWS, SRU'],
+    ['FaShieldAlt', 'Sulphide / pyrophoric oxidiser', 'Converts H₂S and pyrophoric FeS into stable compounds.', 'Post-treatment wash, packed beds, SWS, SRU'],
     ['FaBalanceScale', 'Neutraliser', 'Corrects pH and treats ammonia / acid residues for disposal.', 'Post-rinse, effluent tanks'],
     ['FaWater', 'Antifoam / dispersant', 'Controls foaming and keeps solids dispersed.', 'Amine systems, boil-outs']];
   for (const [i, [ic, t, d, u]] of tk.entries()) {
